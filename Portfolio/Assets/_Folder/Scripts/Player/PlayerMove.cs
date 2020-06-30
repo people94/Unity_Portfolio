@@ -4,18 +4,66 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
+    private Animator anim;
     private CharacterController cc;
-    public float speed = 0.0f;
+    public float speed = 5.0f;
+    public float teleportDis = 20.0f;
+    [HideInInspector] public bool isTouch = false;           //터치 중인지
+    public float rotSpeed = 5.0f;
+    [HideInInspector] public Vector3 movePos;                //플레이어 이동 방향(포지션)
+    [HideInInspector] public Quaternion rot;                 //플레이어 회전값(회전)
+    public GameObject teleportPref;                         //텔레포트 프리팹
 
     private void Start()
     {
         cc = GetComponent<CharacterController>();
-        speed = 5.0f;
+        anim = GetComponentInChildren<Animator>();
     }
 
-    public void Move(Vector3 dir)
+    private void Update()
     {
-        cc.SimpleMove(dir * speed);
+        if (isTouch)
+        {
+            Move();
+            Rotate();
+        }
+        else
+        {
+            anim.SetBool("Idle", true);
+            anim.SetBool("Walk", false);
+        }
+    }
+
+    public void Move()
+    {
+        cc.SimpleMove(movePos * speed);
         //애니메이션 플레이
+        anim.SetBool("Walk", true);
+        anim.SetBool("Idle", false);
+    }
+
+    public void Rotate()
+    {
+        Quaternion curRot = Quaternion.LookRotation(transform.forward);
+        transform.rotation = Quaternion.Slerp(curRot, rot, rotSpeed * Time.deltaTime);
+        //transform.rotation = dir;
+    }
+
+    public void Teleport()
+    {
+        //transform.Translate(transform.forward * teleportDis, Space.World);
+        StartCoroutine(DoTeleport());
+        anim.SetTrigger("Teleport");
+        
+    }
+
+    IEnumerator DoTeleport()
+    {
+        yield return new WaitForSeconds(0.5f);
+        GameObject startTeleport = Instantiate(teleportPref, new Vector3(transform.position.x, transform.position.y + 1.0f, transform.position.z), transform.rotation);
+        transform.Translate(Vector3.forward * teleportDis);
+        Destroy(startTeleport, 1.0f);
+        GameObject destTeleport = Instantiate(teleportPref, new Vector3(transform.position.x, transform.position.y + 1.0f, transform.position.z), transform.rotation);
+        Destroy(destTeleport, 1.0f);
     }
 }

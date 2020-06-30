@@ -21,12 +21,6 @@ public class EnemyUI : MonoBehaviour
         rectHp = this.gameObject.GetComponent<RectTransform>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void LateUpdate()
     {
         //월드좌표계를 스크린에서 사용할 수 있도록 변환
