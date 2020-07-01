@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class BouncingObjectPool : MonoBehaviour
 {
-    public static BouncingObjectPool instance = null;                   //싱글톤패턴을 위한 인스턴스
-    private Queue<BouncingAttack> bouncingPool = null;              //기본공격 프리팹담을 풀
+    public static BouncingObjectPool instance = null;             //싱글톤패턴을 위한 인스턴스
+    private Queue<BouncingAttack> bouncingPool = null;            //기본공격 프리팹담을 풀
     public GameObject bouncingAttack = null;                      //기본공격 프리팹
 
     private void Awake()

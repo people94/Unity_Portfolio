@@ -33,13 +33,13 @@ public class NormalAttack : MonoBehaviour
         if(collision.gameObject.CompareTag("ENEMY"))
         {
             collision.collider.transform.GetComponent<EnemyFSM>().HitDamage(100);
-            NormalObjectPool.instance.ReturnNormal(this);
+            //NormalObjectPool.instance.ReturnNormal(this);
         }
     }
 
     IEnumerator Return()
     {
         yield return new WaitForSeconds(5.0f);
-        NormalObjectPool.instance.ReturnNormal(this);
+        //NormalObjectPool.instance.ReturnNormal(this);
     }
 }

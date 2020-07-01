@@ -4626,7 +4626,7 @@ GameObject:
   - component: {fileID: 19800002}
   - component: {fileID: 19900002}
   m_Layer: 0
-  m_Name: ToonFire - Explosion 2 +Glow PS
+  m_Name: Teleport1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4657,7 +4657,7 @@ ParticleSystem:
   serializedVersion: 6
   lengthInSec: 1
   simulationSpeed: 1
-  stopAction: 0
+  stopAction: 2
   cullingMode: 3
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}

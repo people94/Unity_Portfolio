@@ -45,8 +45,13 @@ public class PlayerMove : MonoBehaviour
     public void Rotate()
     {
         Quaternion curRot = Quaternion.LookRotation(transform.forward);
-        transform.rotation = Quaternion.Slerp(curRot, rot, rotSpeed * Time.deltaTime);
+        transform.rotation = rot;
         //transform.rotation = dir;
+    }
+
+    public void UsePortal(Vector3 destPos)
+    {
+        this.transform.position = destPos;
     }
 
     public void Teleport()
