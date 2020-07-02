@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Cataclysm : MonoBehaviour
 {
-    public float fallingSpeed;
+    public float startSpeed;
+    private float fallingSpeed;
     public float addSpeed;
     public float time;
     public int damage = 100;                                   //몬스터랑 적중시 줄 데미지
@@ -20,6 +21,7 @@ public class Cataclysm : MonoBehaviour
         //GameObject spawnEffect = Instantiate(spawnPref);
         //if(spawnEffect != null)
         //    Destroy(spawnEffect, 3.0f);
+        fallingSpeed = startSpeed;
         StartCoroutine(AddSpeed());
     }
 

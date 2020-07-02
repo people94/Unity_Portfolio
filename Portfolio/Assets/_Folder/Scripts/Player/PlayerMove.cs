@@ -6,7 +6,7 @@ public class PlayerMove : MonoBehaviour
 {
     private Animator anim;
     private CharacterController cc;
-    public float speed = 5.0f;
+    public float speed = 5.0f;                               //플레이어 이동속도
     public float teleportDis = 20.0f;
     [HideInInspector] public bool isTouch = false;           //터치 중인지
     public float rotSpeed = 5.0f;
@@ -22,24 +22,32 @@ public class PlayerMove : MonoBehaviour
 
     private void Update()
     {
-        if (isTouch)
+        if(isTouch)
         {
             Move();
             Rotate();
         }
         else
         {
-            anim.SetBool("Idle", true);
-            anim.SetBool("Walk", false);
+            Idle();
         }
     }
 
     public void Move()
     {
-        cc.SimpleMove(movePos * speed);
-        //애니메이션 플레이
-        anim.SetBool("Walk", true);
         anim.SetBool("Idle", false);
+        cc.SimpleMove(movePos * speed);
+        Debug.Log(movePos.magnitude);
+        //애니메이션 플레이
+        if (movePos.magnitude <= 0.7)
+        {
+            anim.SetBool("Walk", true);
+        }
+        else
+        {
+            anim.SetBool("Walk", false);
+            anim.SetTrigger("Run");
+        }
     }
 
     public void Rotate()
@@ -47,6 +55,12 @@ public class PlayerMove : MonoBehaviour
         Quaternion curRot = Quaternion.LookRotation(transform.forward);
         transform.rotation = rot;
         //transform.rotation = dir;
+    }
+
+    public void Idle()
+    {
+        anim.SetBool("Idle", true);
+        anim.SetBool("Walk", false);
     }
 
     public void UsePortal(Vector3 destPos)

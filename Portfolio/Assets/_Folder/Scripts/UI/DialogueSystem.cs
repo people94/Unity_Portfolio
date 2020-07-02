@@ -35,7 +35,11 @@ public class DialogueSystem : MonoBehaviour
 
     public void NextDialogue()
     {
-        if (dialogueIdx == dialogue.Length) HideDialogue();
+        if (dialogueIdx == dialogue.Length)
+        {
+            HideDialogue();
+            return;
+        }
         dialogueText.text = dialogue[dialogueIdx++].dialogue;
     }
 

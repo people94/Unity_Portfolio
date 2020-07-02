@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Map1 : MonoBehaviour
 {
-    public GameObject[] spawnPoint = new GameObject[5];                     //에너미 스폰할 장소
+    private bool mapClear;                              //맵 클리어 여부
+    EnemyCounter enemyCnt;                              //에너미 개수
+    public GameObject[] spawnPoint;                     //에너미 스폰할 장소
     public GameObject enemyPref;                        //에너미 프리팹
     private Queue<GameObject> enemys;                   //에너미들 담은 리스트
     //public GameObject spawnEffect;                    //에너미 스폰할 때 발생할 파티클
@@ -20,6 +22,8 @@ public class Map1 : MonoBehaviour
 
     private void Start()
     {
+        enemyCnt = GetComponent<EnemyCounter>();
+        Debug.Log(spawnPoint.Length);
         ds = GetComponent<DialogueSystem>();
         player = GameObject.Find("Player");
         enemys = new Queue<GameObject>();
@@ -68,7 +72,7 @@ public class Map1 : MonoBehaviour
         enemy.transform.position = spawnPoint[spawnIdx++].transform.position;
         enemy.SetActive(true);
         enemy.transform.SetParent(this.transform);
-        player.SetActive(false);
+        //player.SetActive(false);
     }
 
     public void OnClickGuide()
@@ -95,4 +99,5 @@ public class Map1 : MonoBehaviour
             guideButton.SetActive(true);
         }
     }
+
 }

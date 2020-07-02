@@ -123,7 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4798880b29c783b4b9ff291e63d0eafd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fallingSpeed: 15
+  startSpeed: 15
   addSpeed: 2
   time: 0.5
   damage: 100

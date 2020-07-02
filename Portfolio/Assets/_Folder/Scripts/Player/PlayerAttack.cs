@@ -144,8 +144,8 @@ public class PlayerAttack : MonoBehaviour
         if (target == null)
         {
             Cataclysm cataclysm = CataclysmPool.instance.PopCataclysm();
-            cataclysm.gameObject.transform.position = new Vector3(this.transform.position.x, this.transform.position.y + cataclysmHeight, this.transform.position.z + cataclysmDis);
-            cataclysm.startPos = new Vector3(this.transform.position.x, this.transform.position.y + cataclysmHeight, this.transform.position.z + cataclysmDis);
+            cataclysm.gameObject.transform.position = new Vector3(transform.position.x, transform.position.y + cataclysmHeight, transform.position.z) + transform.forward * cataclysmDis;
+            cataclysm.startPos = new Vector3(transform.position.x, transform.position.y + cataclysmHeight, transform.position.z) + transform.forward * cataclysmDis;
             //cataclysm.fallingSpeed = cataclysmSpeed;
             cataclysm.attackRange = cataclysmRange;
         }

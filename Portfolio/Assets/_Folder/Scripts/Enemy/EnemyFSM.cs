@@ -22,11 +22,11 @@ public class EnemyFSM : MonoBehaviour
     public float attackRange = 2f;  //공격 가능 범위
     Vector3 startPoint;             //몬스터 시작위치
     Quaternion startRotation;       //몬스터 시작회전값
-    Transform player;               //플레이어 찾기 위해
-    CharacterController cc;         //이동처리를 위한 캐릭터 컨트롤러
+    GameObject player;               //플레이어 찾기 위해
     NavMeshAgent nav;               //네비게이션 위해
     public GameObject hpBarPref;    //hp바 프리팹
     public Vector3 hpBarOffset = new Vector3(0, 2.2f, 0);
+    private EnemyCounter enemyCnt;
 
     private Canvas uiCanvas;
     private Image hpBarImage;
@@ -43,7 +43,6 @@ public class EnemyFSM : MonoBehaviour
     float attTime = 2.0f;           //2초에 한번 공격
     float timer = 0.0f;             //타이머
 
-
     IEnumerator decreaseHP;         //에너미 피깎는 코루틴변수
 
     // Start is called before the first frame update
@@ -56,17 +55,16 @@ public class EnemyFSM : MonoBehaviour
         startPoint = transform.position;
         startRotation = transform.rotation;
         //플레이어 위치 찾기
-        player = GameObject.Find("Player").transform;
-
-        //캐릭터 컨트롤러 찾기
-        cc = GetComponent<CharacterController>();
-
+        player = GameObject.Find("Player");
+       
         //애니메이터 컴포넌트 찾기
         //anim = GetComponentInChildren<Animator>();
 
         nav = GetComponent<NavMeshAgent>();
 
         SetHpBar();
+
+        enemyCnt = GetComponentInParent<EnemyCounter>();
     }
 
     // Update is called once per frame
@@ -111,7 +109,8 @@ public class EnemyFSM : MonoBehaviour
     //대기상태
     private void Idle()
     {
-        if (Vector3.Distance(transform.position, player.position) < findRange)
+        Debug.Log(player.name);
+        if (Vector3.Distance(transform.position, player.transform.position) < findRange)
         {
             state = EnemyState.Move;
             print("상태전환 : Idle -> Move");
@@ -134,9 +133,9 @@ public class EnemyFSM : MonoBehaviour
             //anim.SetTrigger("Return");
         }
         //리턴상태가 아니면 플레이어를 추격해야 한다
-        else if (Vector3.Distance(transform.position, player.position) > attackRange)
+        else if (Vector3.Distance(transform.position, player.transform.position) > attackRange)
         {
-            nav.destination = player.transform.position;
+            nav.destination = player.transform.transform.position;
         }
         else//공격범위 안에 들어옴
         {
@@ -152,7 +151,7 @@ public class EnemyFSM : MonoBehaviour
     private void Attack()
     {
         //공격범위안에 들어옴
-        if (Vector3.Distance(transform.position, player.position) < attackRange)
+        if (Vector3.Distance(transform.position, player.transform.position) < attackRange)
         {
             //일정 시간마다 플레이어를 공격하기
             timer += Time.deltaTime;
@@ -286,13 +285,16 @@ public class EnemyFSM : MonoBehaviour
 
         //죽음상태를 처리하기 위한 코루틴 실행
         StartCoroutine(DieProc());
+
+        enemyCnt.enemyCnt--;
+        if(enemyCnt.enemyCnt == 0)
+        {
+            GetComponentInParent<EnemyCounter>().PortalOpen();
+        }
     }
 
     IEnumerator DieProc()
     {
-        //캐릭터컨트롤러 비활성화
-        cc.enabled = false;
-
         //2초후에 자기자신을 제거한다
         yield return new WaitForSeconds(2.0f);
         print("죽음");
