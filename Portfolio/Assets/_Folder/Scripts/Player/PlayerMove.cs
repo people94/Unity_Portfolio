@@ -37,7 +37,6 @@ public class PlayerMove : MonoBehaviour
     {
         anim.SetBool("Idle", false);
         cc.SimpleMove(movePos * speed);
-        Debug.Log(movePos.magnitude);
         //애니메이션 플레이
         if (movePos.magnitude <= 0.7)
         {

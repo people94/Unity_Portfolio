@@ -21,7 +21,6 @@ public class DialogueSystem : MonoBehaviour
 
     public void StartDialogue()
     {
-        Time.timeScale = 0;
         DialogueOnOff(true);
         dialogueIdx = 0;
         NextDialogue();
@@ -34,12 +33,7 @@ public class DialogueSystem : MonoBehaviour
     }
 
     public void NextDialogue()
-    {
-        if (dialogueIdx == dialogue.Length)
-        {
-            HideDialogue();
-            return;
-        }
+    {        
         dialogueText.text = dialogue[dialogueIdx++].dialogue;
     }
 

@@ -8,43 +8,45 @@ using UnityEngine.UI;
 public class EnemyFSM : MonoBehaviour
 {
     //몬스터 상태 이넘문
-    enum EnemyState
+    protected enum EnemyState
     {
-        Idle, Move, Attack, Return, Damaged, Die
+        Idle, Patrol, Move, Attack, Return, Damaged, Die
     }
 
-    EnemyState state;
-    //GameObject target;    
-
-    //필요한 변수들
-    public float findRange = 15f;   //플레이어를 찾는 범위
-    public float moveRange = 30f;   //시작지점에서 최대 이동가능한 번위
-    public float attackRange = 2f;  //공격 가능 범위
-    Vector3 startPoint;             //몬스터 시작위치
-    Quaternion startRotation;       //몬스터 시작회전값
-    GameObject player;               //플레이어 찾기 위해
-    NavMeshAgent nav;               //네비게이션 위해
-    public GameObject hpBarPref;    //hp바 프리팹
-    public Vector3 hpBarOffset = new Vector3(0, 2.2f, 0);
-    private EnemyCounter enemyCnt;
-
+    #region "private"
+    [SerializeField] private GameObject hpBarPref;    //hp바 프리팹
     private Canvas uiCanvas;
     private Image hpBarImage;
-
-    //애니메이션을 제어하기 위한 애니메이터 컴포넌트
-
-    //몬스터 일반변수
-    float maxHp = 100;                //전체 체력
-    float hp = 100;                   //체력
-    int att = 5;                    //공격력
-    float speed = 5.0f;             //이동속도
-
+    
     //공격 딜레이
     float attTime = 2.0f;           //2초에 한번 공격
     float timer = 0.0f;             //타이머
-
     IEnumerator decreaseHP;         //에너미 피깎는 코루틴변수
+    #endregion
 
+    #region "public"
+    public Vector3 hpBarOffset = new Vector3(0, 2.2f, 0);
+    public List<Transform> wayPoints;                   //순찰 하는 지점
+    #endregion
+
+    #region "proteced"
+    [HideInInspector] protected float findRange;   //플레이어를 찾는 범위
+    [HideInInspector] protected float moveRange;   //시작지점에서 최대 이동가능한 번위
+    [HideInInspector] protected float attackRange;  //공격 가능 범위
+    protected int nextIdx;                                 //다음 순찰지점 인덱스
+    protected NavMeshAgent nav;                         //네비게이션 위해
+    protected EnemyState state;
+    protected Vector3 startPoint;             //몬스터 시작위치
+    protected Quaternion startRotation;       //몬스터 시작회전값
+    protected Vector3 destPos;                //도착 지점
+    protected GameObject player;              //플레이어 찾기 위해
+    protected EnemyCounter enemyCnt;
+    protected float maxHp = 100;              //전체 체력
+    protected float hp = 100;                 //체력
+    protected int att = 5;                    //공격력
+    protected float speed = 5.0f;             //이동속도
+    #endregion
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -65,6 +67,24 @@ public class EnemyFSM : MonoBehaviour
         SetHpBar();
 
         enemyCnt = GetComponentInParent<EnemyCounter>();
+
+        //하이러키 뷰의 WayPointGroup 게임오브젝트를 추출
+        var group = GameObject.Find("WayPointGroup");
+        if (group != null)
+        {
+            //WayPointGroup 하위에 있는 모든 Transform 컴포넌트를 추출한 후
+            //List 타입의 wayPints 배열에 추가
+            group.GetComponentsInChildren<Transform>(wayPoints);
+            Debug.Log("WayPoint : " + wayPoints.Count);
+            //이것도 가능
+            //Transform[] ways = group.GetComponentsInChildren<Transform>();
+            //wayPoints.AddRange(ways);
+            //배열의 첫 번째 항목 삭제
+            wayPoints.RemoveAt(0);
+
+            //첫 번째로 이동할 위치를 불규칙하게 추출
+            nextIdx = Random.Range(0, wayPoints.Count);
+        }
     }
 
     // Update is called once per frame
@@ -75,6 +95,9 @@ public class EnemyFSM : MonoBehaviour
         {
             case EnemyState.Idle:
                 Idle();
+                break;
+            case EnemyState.Patrol:
+                Patrol();
                 break;
             case EnemyState.Move:
                 Move();
@@ -94,7 +117,7 @@ public class EnemyFSM : MonoBehaviour
         }//end of switch
     }//end of void Update()
 
-    void SetHpBar()
+    private void SetHpBar()
     {
         uiCanvas = GameObject.Find("UI Canvas").GetComponent<Canvas>();
         GameObject hpBar = Instantiate<GameObject>(hpBarPref, uiCanvas.transform);
@@ -107,27 +130,44 @@ public class EnemyFSM : MonoBehaviour
     }
 
     //대기상태
-    private void Idle()
+    public virtual void Idle()
     {
-        Debug.Log(player.name);
+        Debug.Log("EnemyFSM : Idle");
+        
+    }
+
+    public virtual void Patrol()
+    {
         if (Vector3.Distance(transform.position, player.transform.position) < findRange)
         {
             state = EnemyState.Move;
-            print("상태전환 : Idle -> Move");
+            //print("상태전환 : Idle -> Move");
 
             //애니메이션 상태 변환하기
             //anim.SetTrigger("Move");
         }
+        else
+        {
+            state = EnemyState.Patrol;
+            nav.destination = wayPoints[nextIdx].position;
+
+            if (Vector3.Distance(gameObject.transform.position, wayPoints[nextIdx].position) < 0.1f)
+            {
+                //다음 목적지의 배열 첨자를 계산
+                //nextIdx = ++nextIdx % wayPoints.Count;
+                nextIdx = Random.Range(0, wayPoints.Count);
+            }
+        }
     }
 
     //플레이어 추격 상태
-    private void Move()
+    public virtual void Move()
     {
         //이동중 이동할 수 있는 최대범위에 들어왔을때
         if (Vector3.Distance(transform.position, startPoint) > moveRange)
         {
             state = EnemyState.Return;
-            print("상태전환 : Move -> Return");
+            //print("상태전환 : Move -> Return");
 
             //애니메이션
             //anim.SetTrigger("Return");
@@ -148,7 +188,7 @@ public class EnemyFSM : MonoBehaviour
     }
 
     //공격 상태
-    private void Attack()
+    public virtual void Attack()
     {
         //공격범위안에 들어옴
         if (Vector3.Distance(transform.position, player.transform.position) < attackRange)
@@ -180,7 +220,7 @@ public class EnemyFSM : MonoBehaviour
     }
 
     //복귀상태
-    private void Return()
+    public virtual void Return()
     {
         //시작위치까지 도달하지 않을때는 이동
         //도착하면 대기상태로 변경
@@ -241,7 +281,7 @@ public class EnemyFSM : MonoBehaviour
     }
 
     //피격상태 (Any State)
-    private void Damaged()
+    public virtual void Damaged()
     {
         //피격 상태를 처리하기 위한 코루틴을 실행한다
         StartCoroutine(DamageProc());
@@ -278,7 +318,7 @@ public class EnemyFSM : MonoBehaviour
     }
 
     //죽음상태 (Any State)
-    private void Die()
+    public virtual void Die()
     {
         //진행중인 모든 코루틴은 정지한다
         StopAllCoroutines();

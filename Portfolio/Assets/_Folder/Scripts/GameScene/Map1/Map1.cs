@@ -8,7 +8,8 @@ public class Map1 : MonoBehaviour
     EnemyCounter enemyCnt;                              //에너미 개수
     public GameObject[] spawnPoint;                     //에너미 스폰할 장소
     public GameObject enemyPref;                        //에너미 프리팹
-    private Queue<GameObject> enemys;                   //에너미들 담은 리스트
+    private List<GameObject> enemys;                   //에너미들 담은 리스트
+    private int enemyIdx;                              //에너미 리스트 인덱스
     //public GameObject spawnEffect;                    //에너미 스폰할 때 발생할 파티클
     public GameObject spawningCameraPos;                //에너미 스폰될 때 카메라 위치
     private bool playerEnter = false;
@@ -23,16 +24,15 @@ public class Map1 : MonoBehaviour
     private void Start()
     {
         enemyCnt = GetComponent<EnemyCounter>();
-        Debug.Log(spawnPoint.Length);
         ds = GetComponent<DialogueSystem>();
         player = GameObject.Find("Player");
-        enemys = new Queue<GameObject>();
+        enemys = new List<GameObject>();
         for(int i = 0; i < spawnPoint.Length; i++)
         {
             GameObject enemy = Instantiate(enemyPref);
             enemy.SetActive(false);
             //enemy.transform.position = spawnPoint[i].transform.position;
-            enemys.Enqueue(enemy);
+            enemys.Add(enemy);
         }
     }
     
@@ -52,7 +52,7 @@ public class Map1 : MonoBehaviour
         {
             yield return new WaitForSeconds(0.5f);
             SpawningEnemy();
-            if (enemys.Count == 0)
+            if (enemyIdx >= enemys.Count)
             {
                 player.SetActive(true);
                 yield return new WaitForSeconds(1.0f);
@@ -67,11 +67,10 @@ public class Map1 : MonoBehaviour
 
     private void SpawningEnemy()
     {
-        GameObject enemy = enemys.Dequeue();
-        Debug.Log(enemys.Count);
-        enemy.transform.position = spawnPoint[spawnIdx++].transform.position;
-        enemy.SetActive(true);
-        enemy.transform.SetParent(this.transform);
+        enemys[enemyIdx].transform.position = spawnPoint[spawnIdx++].transform.position;
+        enemys[enemyIdx].transform.rotation = Quaternion.Euler(enemys[enemyIdx].transform.rotation.x, enemys[enemyIdx].transform.rotation.y + 180, enemys[enemyIdx].transform.rotation.z);
+        enemys[enemyIdx].SetActive(true);
+        enemys[enemyIdx++].transform.SetParent(this.transform);
         //player.SetActive(false);
     }
 
@@ -88,10 +87,19 @@ public class Map1 : MonoBehaviour
 
     public void OnClickNext()
     {
-        Time.timeScale = 0;        
-        if(attackGuide)
+        Time.timeScale = 0;
+        if (ds.dialogueIdx == ds.dialogue.Length)
         {
-            ds.NextDialogue();
+            ds.HideDialogue();
+            for (int i = 0; i < enemys.Count; i++)
+            {
+                enemys[i].GetComponent<EnemyFSM>().Patrol();
+            }
+            return;
+        }
+        if (attackGuide)
+        {
+            ds.NextDialogue();            
         }
         if (ds.dialogueIdx == 2)
         {
