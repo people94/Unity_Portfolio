@@ -17,11 +17,7 @@ public class Cataclysm : MonoBehaviour
 
     private void OnEnable()
     {
-        //스폰 이펙트 만들고 1초 뒤에 삭제
-        //GameObject spawnEffect = Instantiate(spawnPref);
-        //if(spawnEffect != null)
-        //    Destroy(spawnEffect, 3.0f);
-        fallingSpeed = startSpeed;
+        //스폰 이펙트 만들고 1초 뒤에 삭제        
         StartCoroutine(AddSpeed());
     }
 
@@ -30,6 +26,14 @@ public class Cataclysm : MonoBehaviour
         //fallingSpeed += 2 * Time.deltaTime;
         //계속 밑으로 떨어지기만 한다.
         this.transform.Translate(Vector3.down * fallingSpeed * Time.deltaTime);
+    }
+
+    public void Spawn()
+    {
+        GameObject spawnEffect = Instantiate(spawnPref, this.transform.position, this.transform.rotation);
+        if (spawnEffect != null)
+            Destroy(spawnEffect, 3.0f);
+        fallingSpeed = startSpeed;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -41,9 +45,9 @@ public class Cataclysm : MonoBehaviour
             {
                 enemy.gameObject.GetComponent<EnemyFSM>().HitDamage(damage);
             }
-            //GameObject hitEffect = Instantiate(hitPref);
-            //if(hitEffect != null)
-            //    Destroy(hitEffect, 3.0f);
+            GameObject hitEffect = Instantiate(hitPref, new Vector3(this.transform.position.x, this.transform.position.y - 2, this.transform.position.z), this.transform.rotation);
+            if(hitEffect != null)
+                Destroy(hitEffect, 3.0f);
             CataclysmPool.instance.ReturnCataclysm(this);
         }
     }

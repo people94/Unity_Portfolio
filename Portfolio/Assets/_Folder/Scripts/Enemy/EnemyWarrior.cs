@@ -17,26 +17,26 @@ public class EnemyWarrior : EnemyFSM
 
     public override void Idle()
     {
-        Debug.Log("EnemyWarrior : Idle");
+        Debug.Log("Warrior : Idle");
         base.Idle();
     }
 
 
-    public override void Move()
+    public override void Trace()
     {
-        print("Warrior : Idle -> Move");
-        base.Move();
+        print("Warrior : Move");
+        base.Trace();
     }
 
     public override void Attack()
     {
-        print("Warrior : Move -> Attack");
-        base.Attack();
+        print("Warrior : Attack");
+        base.Attack();        
     }
 
     public override void Return()
     {
-        print("Warrior : Move -> Return");
+        print("Warrior : Return");
         base.Return();
     }
 

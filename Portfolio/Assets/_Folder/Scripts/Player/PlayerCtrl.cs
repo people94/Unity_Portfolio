@@ -6,8 +6,8 @@ using UnityEngine.UI;
 public class PlayerCtrl : MonoBehaviour
 {
     #region "플레이어 hp/mp"
-    public Slider hpBar = null;             //hp바   
-    public Slider mpBar = null;             //mp바
+    public Image hpBar = null;             //hp바   
+    private Image mpBar = null;             //mp바
     private float maxHp = 100.0f;           //플레이어 전체 체력
     private float curHp;                    //플레이어 현재 체력
     private float maxMp = 100.0f;           //플레이어 전체 마나
@@ -16,7 +16,6 @@ public class PlayerCtrl : MonoBehaviour
     private float chargeTime = 0.5f;        //충전되는 시간
     IEnumerator coroutine;
     #endregion
-    
 
     private void OnEnable()
     {
@@ -31,11 +30,6 @@ public class PlayerCtrl : MonoBehaviour
             Debug.Log("1번");
             HitDamage(10);
         }
-        if (Input.GetKeyDown("2"))
-        {
-            Debug.Log("2번");
-            ChangeMp(-10);
-        }
     }
 
     //플레이어에게 데미지 줄때 호출할 함수
@@ -47,7 +41,7 @@ public class PlayerCtrl : MonoBehaviour
 
     //hp 변경할 일이 있을 때 호출하는 함수
     public void ChangeHp(float value)
-    {        
+    {
         curHp += value;
         coroutine = SlowChangeHp(value);
         StartCoroutine(coroutine);
@@ -64,7 +58,7 @@ public class PlayerCtrl : MonoBehaviour
     //hp 천천히 줄어들거나 늘리게 하는 함수
     IEnumerator SlowChangeHp(float value)
     {
-        float saveHp = hpBar.value + value;
+        float saveHp = hpBar.fillAmount * 100 + value;
         while (true)
         {
             if (curTime >= chargeTime)
@@ -72,11 +66,11 @@ public class PlayerCtrl : MonoBehaviour
                 StopCoroutine(coroutine);
                 coroutine = null;
                 curTime = 0.0f;
-                hpBar.value = (int)saveHp;
+                hpBar.fillAmount = saveHp / 100.0f;
                 break;
             }
             curTime += Time.deltaTime;
-            hpBar.value += value * Time.deltaTime / chargeTime;
+            hpBar.fillAmount += value * Time.deltaTime / chargeTime / 100;
             yield return null;
         }
     }
@@ -84,7 +78,7 @@ public class PlayerCtrl : MonoBehaviour
     //mp 천천히 줄어들거나 늘리게 하는 함수
     IEnumerator SlowChangeMp(float value)
     {
-        float saveMp = mpBar.value + value;
+        float saveMp = mpBar.fillAmount * 100+ value;
         while (true)
         {
             if (curTime >= chargeTime)
@@ -92,11 +86,11 @@ public class PlayerCtrl : MonoBehaviour
                 StopCoroutine(coroutine);
                 coroutine = null;
                 curTime = 0.0f;
-                mpBar.value = (int)saveMp;
+                mpBar.fillAmount = saveMp / 100.0f;
                 break;
             }
             curTime += Time.deltaTime;
-            mpBar.value += value * Time.deltaTime / chargeTime;
+            mpBar.fillAmount += value * Time.deltaTime / chargeTime / 100;
             yield return null;
         }
     }

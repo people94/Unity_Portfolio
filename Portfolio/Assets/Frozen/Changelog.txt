@@ -1,0 +1,30 @@
+Version 2.5:
+- Fixed icon slots drag and drop functionallity.
+
+Version 2.4:
+- Hotfix for NGUI v3.6.9
+- Updated all fonts for better quality.
+
+Version 2.3:
+- Fixed UIWindow not hooking the EventListener for the focus on press.
+- Fixed UIWindow auto IDing.
+
+Version 2.2:
+- Fixed UISelectField bug introduced in NGUI 3.6.1C.
+
+Version 2.1:
+- Updated FrozenUI_OnOffSwitch inspector script.
+- Updated UIImageCheckbox inspector script.
+- Updated UIImageThumb inspector script.
+- Updated UIInputFocus inspector script.
+- UIWindow hotfixes.
+- Fixed small issue with the FixWidgetDepth script.
+- Added contidion option on UITable_ItemMargin.
+- Improved Icon Slots, alot of small issues.
+- Improved Tooltip, now properly gets top-most depth.
+- Improved Window Pagination, now uses a transform instead of array.
+- Added UIWindow class.
+- Improved window background.
+- Added window drag handle.
+- Split the UI on couple of scenes.
+- Fixed UISelectField background sizing.

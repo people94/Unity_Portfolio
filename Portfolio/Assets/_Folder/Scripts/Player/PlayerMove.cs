@@ -12,7 +12,8 @@ public class PlayerMove : MonoBehaviour
     public float rotSpeed = 5.0f;
     [HideInInspector] public Vector3 movePos;                //플레이어 이동 방향(포지션)
     [HideInInspector] public Quaternion rot;                 //플레이어 회전값(회전)
-    public GameObject teleportPref;                         //텔레포트 프리팹
+    public GameObject teleportPref2;
+    private bool isMove = false;                                    //이동중인지
 
     private void Start()
     {
@@ -22,38 +23,79 @@ public class PlayerMove : MonoBehaviour
 
     private void Update()
     {
-        if(isTouch)
-        {
-            Move();
-            Rotate();
-        }
-        else
-        {
-            Idle();
-        }
+       
+        Move();
+        Rotate();
+        
+        if(!isMove)
+            Idle();       
     }
 
     public void Move()
-    {
-        anim.SetBool("Idle", false);
-        cc.SimpleMove(movePos * speed);
-        //애니메이션 플레이
-        if (movePos.magnitude <= 0.7)
+    {        
+        if (isTouch)
         {
-            anim.SetBool("Walk", true);
+            isMove = true;
+            anim.SetBool("Idle", false);
+            //transform.rotation =Quaternion.LookRotation( movePos);
+            cc.SimpleMove(movePos * speed);
+            //애니메이션 플레이
+            if (movePos.magnitude <= 0.7)
+            {
+                anim.SetBool("Walk", true);
+            }
+            else
+            {
+                anim.SetBool("Walk", false);
+                anim.SetTrigger("Run");
+            }
         }
         else
         {
-            anim.SetBool("Walk", false);
-            anim.SetTrigger("Run");
+            isMove = false;
+            float h = Input.GetAxis("Horizontal");
+            float v = Input.GetAxis("Vertical");
+            if (h != 0 || v != 0)
+            {
+                isMove = true;
+                movePos = (Vector3.forward * v) + (Vector3.right * h);
+                transform.Translate(movePos.normalized * speed * Time.deltaTime, Space.Self);
+
+                //애니메이션 플레이     
+                if (movePos.magnitude <= 0.7)
+                {
+                    anim.SetBool("Walk", true);
+                }
+                else
+                {
+                    anim.SetBool("Walk", false);
+                    anim.SetTrigger("Run");
+                }
+                //movePos.Normalize();
+                //cc.SimpleMove(movePos * speed);
+                anim.SetBool("Idle", false);
+                transform.rotation = Quaternion.Lerp(this.transform.rotation, Quaternion.LookRotation(movePos), Time.deltaTime * 5.0f);                           
+            }
+            else
+            {
+                isMove = false;
+            }
         }
     }
 
     public void Rotate()
     {
-        Quaternion curRot = Quaternion.LookRotation(transform.forward);
-        transform.rotation = rot;
-        //transform.rotation = dir;
+        if (isTouch)
+        {
+            //Quaternion curRot = Quaternion.LookRotation(transform.forward);
+
+            transform.rotation = rot;
+            //transform.rotation = dir;
+        }
+        else
+        {
+            
+        }
     }
 
     public void Idle()
@@ -77,11 +119,11 @@ public class PlayerMove : MonoBehaviour
 
     IEnumerator DoTeleport()
     {
-        yield return new WaitForSeconds(0.5f);
-        GameObject startTeleport = Instantiate(teleportPref, new Vector3(transform.position.x, transform.position.y + 1.0f, transform.position.z), transform.rotation);
+        yield return new WaitForSeconds(0.5f);        
+        GameObject startTeleport2 = Instantiate(teleportPref2, new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z), Quaternion.identity);
         transform.Translate(Vector3.forward * teleportDis);
-        Destroy(startTeleport, 1.0f);
-        GameObject destTeleport = Instantiate(teleportPref, new Vector3(transform.position.x, transform.position.y + 1.0f, transform.position.z), transform.rotation);
-        Destroy(destTeleport, 1.0f);
+        Destroy(startTeleport2, 1.0f);
+        GameObject destTeleport2 = Instantiate(teleportPref2, new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z), Quaternion.identity);        
+        Destroy(destTeleport2, 1.0f);
     }
 }

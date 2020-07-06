@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Map1 : MonoBehaviour
 {
@@ -99,13 +100,27 @@ public class Map1 : MonoBehaviour
         }
         if (attackGuide)
         {
-            ds.NextDialogue();            
+            ds.NextDialogue();
         }
         if (ds.dialogueIdx == 2)
         {
             attackGuide = false;
             guideButton.SetActive(true);
+            StartCoroutine(ChangeColor());
+            Time.timeScale = 1;
         }
     }
 
+    IEnumerator ChangeColor()
+    {
+        while(!attackGuide)
+        {
+            guideButton.transform.GetChild(0).gameObject.SetActive(true);
+            guideButton.transform.GetChild(1).gameObject.SetActive(false);
+            yield return new WaitForSeconds(0.2f);
+            guideButton.transform.GetChild(0).gameObject.SetActive(false);
+            guideButton.transform.GetChild(1).gameObject.SetActive(true);
+            yield return new WaitForSeconds(0.2f);
+        }
+    }
 }

@@ -147,6 +147,7 @@ public class PlayerAttack : MonoBehaviour
             cataclysm.gameObject.transform.position = new Vector3(transform.position.x, transform.position.y + cataclysmHeight, transform.position.z) + transform.forward * cataclysmDis;
             cataclysm.startPos = new Vector3(transform.position.x, transform.position.y + cataclysmHeight, transform.position.z) + transform.forward * cataclysmDis;
             //cataclysm.fallingSpeed = cataclysmSpeed;
+            cataclysm.GetComponent<Cataclysm>().Spawn();
             cataclysm.attackRange = cataclysmRange;
         }
         else
@@ -156,6 +157,7 @@ public class PlayerAttack : MonoBehaviour
             cataclysm.gameObject.transform.position = new Vector3(target.transform.position.x, target.transform.position.y + cataclysmHeight, target.transform.position.z);
             cataclysm.startPos = new Vector3(target.transform.position.x, target.transform.position.y + cataclysmHeight, target.transform.position.z);
             //cataclysm.fallingSpeed = cataclysmSpeed;
+            cataclysm.GetComponent<Cataclysm>().Spawn();
             cataclysm.attackRange = cataclysmRange;
         }
     }

@@ -10,7 +10,7 @@ public class EnemyFSM : MonoBehaviour
     //몬스터 상태 이넘문
     protected enum EnemyState
     {
-        Idle, Patrol, Move, Attack, Return, Damaged, Die
+        Idle, Patrol, Trace, Attack, Return, Damaged, Die
     }
 
     #region "private"
@@ -19,8 +19,7 @@ public class EnemyFSM : MonoBehaviour
     private Image hpBarImage;
     
     //공격 딜레이
-    float attTime = 2.0f;           //2초에 한번 공격
-    float timer = 0.0f;             //타이머
+    
     IEnumerator decreaseHP;         //에너미 피깎는 코루틴변수
     #endregion
 
@@ -33,6 +32,11 @@ public class EnemyFSM : MonoBehaviour
     [HideInInspector] protected float findRange;   //플레이어를 찾는 범위
     [HideInInspector] protected float moveRange;   //시작지점에서 최대 이동가능한 번위
     [HideInInspector] protected float attackRange;  //공격 가능 범위
+    protected float attTime = 4.0f;           //2초에 한번 공격
+    protected float timer = 0.0f;             //타이머
+    protected bool isDie;
+    
+    public Animator anim;
     protected int nextIdx;                                 //다음 순찰지점 인덱스
     protected NavMeshAgent nav;                         //네비게이션 위해
     protected EnemyState state;
@@ -51,7 +55,12 @@ public class EnemyFSM : MonoBehaviour
     void Start()
     {
         //몬스터 상태 초기화
-        state = EnemyState.Idle;
+        state = EnemyState.Patrol;
+
+        timer = attTime;
+
+        //애니메이터 찾기
+        anim = GetComponentInChildren<Animator>();
 
         //시작지점 저장
         startPoint = transform.position;
@@ -67,6 +76,8 @@ public class EnemyFSM : MonoBehaviour
         SetHpBar();
 
         enemyCnt = GetComponentInParent<EnemyCounter>();
+
+        StartCoroutine(CheckState());
 
         //하이러키 뷰의 WayPointGroup 게임오브젝트를 추출
         var group = GameObject.Find("WayPointGroup");
@@ -99,8 +110,8 @@ public class EnemyFSM : MonoBehaviour
             case EnemyState.Patrol:
                 Patrol();
                 break;
-            case EnemyState.Move:
-                Move();
+            case EnemyState.Trace:
+                Trace();
                 break;
             case EnemyState.Attack:
                 Attack();
@@ -117,6 +128,39 @@ public class EnemyFSM : MonoBehaviour
         }//end of switch
     }//end of void Update()
 
+    IEnumerator CheckState()
+    {
+        while (!isDie)
+        {
+            yield return new WaitForSeconds(0.3f);
+            
+            if (Vector3.Distance(transform.position, startPoint) > moveRange)
+            {
+                state = EnemyState.Return;
+                anim.SetBool("Walk", true);
+            }
+            else if (Vector3.Distance(transform.position, player.transform.position) < attackRange)
+            {
+                if(state != EnemyState.Attack)
+                {
+                    timer = attTime;
+                }
+                state = EnemyState.Attack;
+                nav.ResetPath();                
+            }
+            else if (Vector3.Distance(transform.position, player.transform.position) < findRange)
+            {
+                state = EnemyState.Trace;
+                anim.SetBool("Run", true);
+            }
+            else
+            {
+                state = EnemyState.Patrol;
+                anim.SetBool("Walk", true);
+            }
+        }
+    }
+
     private void SetHpBar()
     {
         uiCanvas = GameObject.Find("UI Canvas").GetComponent<Canvas>();
@@ -132,90 +176,45 @@ public class EnemyFSM : MonoBehaviour
     //대기상태
     public virtual void Idle()
     {
-        Debug.Log("EnemyFSM : Idle");
-        
     }
 
     public virtual void Patrol()
     {
-        if (Vector3.Distance(transform.position, player.transform.position) < findRange)
-        {
-            state = EnemyState.Move;
-            //print("상태전환 : Idle -> Move");
+        nav.destination = wayPoints[nextIdx].position;
+        anim.SetBool("Run", false);
 
-            //애니메이션 상태 변환하기
-            //anim.SetTrigger("Move");
-        }
-        else
+        if (Vector3.Distance(gameObject.transform.position, wayPoints[nextIdx].position) < 0.1f)
         {
-            state = EnemyState.Patrol;
-            nav.destination = wayPoints[nextIdx].position;
-
-            if (Vector3.Distance(gameObject.transform.position, wayPoints[nextIdx].position) < 0.1f)
-            {
-                //다음 목적지의 배열 첨자를 계산
-                //nextIdx = ++nextIdx % wayPoints.Count;
-                nextIdx = Random.Range(0, wayPoints.Count);
-            }
-        }
+            //다음 목적지의 배열 첨자를 계산
+            //nextIdx = ++nextIdx % wayPoints.Count;
+            nextIdx = Random.Range(0, wayPoints.Count);
+        }        
     }
 
     //플레이어 추격 상태
-    public virtual void Move()
+    public virtual void Trace()
     {
-        //이동중 이동할 수 있는 최대범위에 들어왔을때
-        if (Vector3.Distance(transform.position, startPoint) > moveRange)
-        {
-            state = EnemyState.Return;
-            //print("상태전환 : Move -> Return");
-
-            //애니메이션
-            //anim.SetTrigger("Return");
-        }
-        //리턴상태가 아니면 플레이어를 추격해야 한다
-        else if (Vector3.Distance(transform.position, player.transform.position) > attackRange)
-        {
-            nav.destination = player.transform.transform.position;
-        }
-        else//공격범위 안에 들어옴
-        {
-            state = EnemyState.Attack;
-            print("상태전환 : Move -> Attack");
-
-            //애니메이션
-            //anim.SetTrigger("Attack");
-        }
+        nav.destination = player.transform.transform.position;
+        anim.SetBool("Walk", false);
     }
 
     //공격 상태
     public virtual void Attack()
     {
-        //공격범위안에 들어옴
-        if (Vector3.Distance(transform.position, player.transform.position) < attackRange)
+        //일정 시간마다 플레이어를 공격하기
+        timer += Time.deltaTime;
+        anim.SetFloat("Attack", timer);
+        anim.SetBool("Run", false);
+        if (timer > attTime)
         {
-            //일정 시간마다 플레이어를 공격하기
-            timer += Time.deltaTime;
-            if (timer > attTime)
-            {
-                print("공격");
-                //플레이어의 필요한 스크립트 컴포넌트를 가져와서 데미지를 주면 된다.
-                //player.GetComponent<PlayerMove>().hitDamage(att);
+            gameObject.transform.LookAt(player.transform);
 
-                //타이머 초기화
-                timer = 0.0f;
+            GetComponentInChildren<EnemyClub>().isAttack = true;
 
-                //애니메이션
-                //anim.SetTrigger("Attack");
-            }
-        }
-        else//현재 상태를 무브로 전환하기 (재추격)
-        {
-            state = EnemyState.Move;
-            print("상태전환 : Attack -> Move");
+            //플레이어의 필요한 스크립트 컴포넌트를 가져와서 데미지를 주면 된다.
+            //player.GetComponent<PlayerTrace>().hitDamage(att);
+            //타이머 초기화
             timer = 0.0f;
-
-            //애니메이션
-            //anim.SetTrigger("Move");
         }
     }
 
@@ -226,9 +225,9 @@ public class EnemyFSM : MonoBehaviour
         //도착하면 대기상태로 변경
         if (Vector3.Distance(transform.position, startPoint) > 0.1f)
         {
-            //Vector3 dir = (startPoint - transform.position).normalized;
-            //transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(dir), 10 * Time.deltaTime);
-            //cc.SimpleMove(dir * speed);
+            Vector3 dir = (startPoint - transform.position).normalized;
+            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(dir), 10 * Time.deltaTime);
+            
             nav.destination = startPoint;
         }
         else
@@ -237,11 +236,7 @@ public class EnemyFSM : MonoBehaviour
             transform.position = startPoint;
             //transform.rotation = startRotation;
             transform.rotation = Quaternion.identity;   //시작 회전값 0으로 초기화
-            state = EnemyState.Idle;
-            print("상태전환 : Return -> Idle");
-
-            //애니메이션
-            //anim.SetTrigger("Idle");
+            state = EnemyState.Patrol;
         }
     }
 
@@ -260,7 +255,6 @@ public class EnemyFSM : MonoBehaviour
         if (hp > 0)
         {
             state = EnemyState.Damaged;
-            print("상태전환 : Any State -> Damaged");
             print("HP : " + hp);
 
             Damaged();
@@ -270,7 +264,6 @@ public class EnemyFSM : MonoBehaviour
         else//0이하이면 죽음상태
         {
             state = EnemyState.Die;
-            print("상태전환 : Any State -> Die");
 
             hpBarImage.GetComponentsInParent<Image>()[1].color = Color.clear;
 
@@ -293,9 +286,8 @@ public class EnemyFSM : MonoBehaviour
         //피격모션 시간만큼 기다리기
         yield return new WaitForSeconds(1.0f);
         //현재상태를 이동으로 전환
-        state = EnemyState.Move;
-        print("상태전환 : Damaged -> Move");
-        //anim.SetTrigger("Move");
+        state = EnemyState.Trace;
+        //anim.SetTrigger("Trace");
     }
 
     //에너미 hp바 줄어들이기용
@@ -337,7 +329,6 @@ public class EnemyFSM : MonoBehaviour
     {
         //2초후에 자기자신을 제거한다
         yield return new WaitForSeconds(2.0f);
-        print("죽음");
         Destroy(this.gameObject);
     }
     
