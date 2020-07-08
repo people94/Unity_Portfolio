@@ -18,6 +18,10 @@ public class JoyStickCtrl : MonoBehaviour, IPointerUpHandler, IPointerDownHandle
     private float angle;                    //조이스틱 배경과 마우스 사이의 각도
     #endregion
 
+    //튜토리얼에서 조이스틱 작동 했는지
+    public GameObject tutorialMap;
+    private bool tutorial = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,6 +40,11 @@ public class JoyStickCtrl : MonoBehaviour, IPointerUpHandler, IPointerDownHandle
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if(!tutorial)
+        {
+            tutorialMap.GetComponent<TutorialMap>().joystickGuide = true;
+            tutorial = true;
+        }
         pc.movePos = Vector3.zero;
         pc.rot = player.transform.rotation;
         pc.isTouch = true;
@@ -61,7 +70,9 @@ public class JoyStickCtrl : MonoBehaviour, IPointerUpHandler, IPointerDownHandle
         distance = Vector2.Distance(backGround.position, handle.position) / radius;
 
         //플레이어가 움직이는 방향
-        pc.movePos = new Vector3(value.x * distance, 0.0f, value.y * distance);
+        //pc.movePos = new Vector3(value.x * distance, 0.0f, value.y * distance);
+        pc.vertical = value.y * distance;
+        pc.horizontal = value.x * distance;
 
         //플레이어의 회전 값
         //atan을 이용해서 각도를 구함
@@ -69,7 +80,7 @@ public class JoyStickCtrl : MonoBehaviour, IPointerUpHandler, IPointerDownHandle
         //value.y = 벡터의 y 방향
         //atan의 결과값은 라디안 이므로 라디안->디그리로 변경 해줘야함.
         //mathf.Rad2Deg = > 상수를 반환하므로 곱하기 해서 디그리로 변경
-        pc.rot.eulerAngles = new Vector3(0, Mathf.Atan2(value.x, value.y) * Mathf.Rad2Deg, 0);
+        //pc.rot.eulerAngles = new Vector3(0, Mathf.Atan2(value.x, value.y) * Mathf.Rad2Deg, 0);
 
         //LookRotation - 플레이어가 움직이는 방향의 회전 값을 구해준다
         //rot = Quaternion.LookRotation(movePos.normalized);

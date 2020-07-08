@@ -5,10 +5,15 @@ using UnityEngine.SceneManagement;
 
 public class SystemManager : MonoBehaviour
 {
+    public enum Stage
+    {
+        None, Tutorial, First, Second, Third, Boss
+    }
     public int prevEffectSound { get; set; }
     public int prevBgSound { get; set; }
     private int effectSound;
     private int bgSound;
+    [HideInInspector] public Stage stageNum = Stage.None;
     public static SystemManager instance;
 
     public int EffectSound

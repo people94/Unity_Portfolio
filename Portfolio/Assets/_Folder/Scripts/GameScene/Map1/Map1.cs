@@ -37,7 +37,7 @@ public class Map1 : MonoBehaviour
         }
     }
     
-    public void EnterPlayer()
+    public void PlayerEnter()
     { 
         prevCameraPos = Camera.main.transform.position;
         prevCameraRot = Camera.main.transform.rotation;
@@ -88,26 +88,29 @@ public class Map1 : MonoBehaviour
 
     public void OnClickNext()
     {
-        Time.timeScale = 0;
-        if (ds.dialogueIdx == ds.dialogue.Length)
+        if (SystemManager.instance.stageNum == SystemManager.Stage.First)
         {
-            ds.HideDialogue();
-            for (int i = 0; i < enemys.Count; i++)
+            Time.timeScale = 0;
+            if (ds.dialogueIdx == ds.dialogue.Length)
             {
-                enemys[i].GetComponent<EnemyFSM>().Patrol();
+                ds.HideDialogue();
+                for (int i = 0; i < enemys.Count; i++)
+                {
+                    enemys[i].GetComponent<EnemyFSM>().Patrol();
+                }
+                return;
             }
-            return;
-        }
-        if (attackGuide)
-        {
-            ds.NextDialogue();
-        }
-        if (ds.dialogueIdx == 2)
-        {
-            attackGuide = false;
-            guideButton.SetActive(true);
-            StartCoroutine(ChangeColor());
-            Time.timeScale = 1;
+            if (attackGuide)
+            {
+                ds.NextDialogue();
+            }
+            if (ds.dialogueIdx == 2)
+            {
+                attackGuide = false;
+                guideButton.SetActive(true);
+                StartCoroutine(ChangeColor());
+                Time.timeScale = 1;
+            }
         }
     }
 

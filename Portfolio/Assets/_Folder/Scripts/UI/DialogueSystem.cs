@@ -39,7 +39,6 @@ public class DialogueSystem : MonoBehaviour
 
     public void HideDialogue()
     {
-        Time.timeScale = 1;
         DialogueOnOff(false);
     }
     

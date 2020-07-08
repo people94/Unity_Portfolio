@@ -82,7 +82,9 @@ Material:
     - _DstBlend: 0
     - _EdgeLength: 10
     - _Emission: 1
+    - _GlossMapScale: 1
     - _Glossiness: 0
+    - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 0.472
@@ -90,6 +92,8 @@ Material:
     - _Parallax: 0.02
     - _RefRate: 1
     - _Shininess: 1
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Transparency: 0
     - _UVSec: 0

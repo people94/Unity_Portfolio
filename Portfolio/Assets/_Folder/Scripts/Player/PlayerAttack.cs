@@ -26,6 +26,14 @@ public class PlayerAttack : MonoBehaviour
 
     private Animator anim = null;
 
+    //튜토리얼에서 Orbital 작동 했는지
+    public GameObject tutorialMap;
+    private bool orbital = false;
+    //튜토리얼에서 Blaze 작동 했는지
+    private bool blaze = false;
+    //튜토리얼에서 cataclysm 작동 했는지
+    private bool cataclysm = false;
+
     private void Start()
     {
         anim = GetComponent<Animator>();
@@ -69,6 +77,11 @@ public class PlayerAttack : MonoBehaviour
     //OrbitalR -> OrbitalL -> 2HAttack
     public void OrbitalAttack()
     {
+        if(!orbital)
+        {
+            tutorialMap.GetComponent<TutorialMap>().orbitalGuide = true;
+            orbital = true;
+        }
         if (!onOrbital)
         {
             //애니메이션 플레이
@@ -104,6 +117,11 @@ public class PlayerAttack : MonoBehaviour
     
     public void DragonBlaze()
     {
+        if (!blaze)
+        {
+            tutorialMap.GetComponent<TutorialMap>().blazeGuide = true;
+            blaze = true;
+        }
         //애니메이션 플레이
         if (!onBlaze)
         {
@@ -141,6 +159,11 @@ public class PlayerAttack : MonoBehaviour
 
     public void Cataclysm()
     {
+        if (!cataclysm)
+        {
+            tutorialMap.GetComponent<TutorialMap>().cataclysmGuide = true;
+            cataclysm = true;
+        }
         if (target == null)
         {
             Cataclysm cataclysm = CataclysmPool.instance.PopCataclysm();
