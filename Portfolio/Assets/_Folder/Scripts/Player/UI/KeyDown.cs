@@ -21,8 +21,11 @@ public class KeyDown : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if(!this.GetComponent<SkillCool>().isCool)
+        if (!this.GetComponent<SkillCool>().isCool)
+        {
             isTouch = true;
+            player.isAttack = true;
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -30,6 +33,8 @@ public class KeyDown : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         if (isTouch)
         {
             isTouch = false;
+            player.isAttack = false;
+            player.gameObject.GetComponentInChildren<Animator>().SetBool("Blaze", false);
             this.GetComponent<SkillCool>().CoolDown();
         }
     }    

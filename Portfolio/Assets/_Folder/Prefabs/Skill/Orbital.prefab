@@ -4755,7 +4755,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3e9703109a99534bb8169ff40b66b88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitPreb: {fileID: 0}
+  hitPreb: {fileID: 107336, guid: 10e7eb0b52f4be8478eada4c05f73cf6, type: 3}
   speed: 10
   returnTarget: {fileID: 0}
   dir: {x: 0, y: 0, z: 0}

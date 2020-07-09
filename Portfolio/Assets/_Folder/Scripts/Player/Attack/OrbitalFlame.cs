@@ -41,11 +41,9 @@ public class OrbitalFlame : MonoBehaviour
         if(other.gameObject.layer == LayerMask.NameToLayer("ENEMY"))
         {
             Debug.Log("에너미 적중");
-            //GameObject hit = Instantiate(hitPreb);
-            //hit.transform.position = other.transform.position;
-            //hit.transform.rotation = Quaternion.Euler(this.transform.rotation.x, this.transform.rotation.y - 180, this.transform.rotation.z);
-            //if (hit != null)
-            //    Destroy(hit, 3.0f);
+            GameObject hit = Instantiate(hitPreb, this.transform.position, this.transform.rotation);
+            if (hit != null)
+                Destroy(hit, 3.0f);
             other.gameObject.GetComponent<EnemyFSM>().HitDamage(damage);
         }
     }

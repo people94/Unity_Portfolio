@@ -24,6 +24,8 @@ public class PlayerAttack : MonoBehaviour
     public float cataclysmHeight = 10.0f;       //Cataclysm 얼마나 위에서 떨어질건지
     public float cataclysmRange = 20.0f;        //Cataclysm 공격 범위
 
+    public bool isAttack = false;               //현재 공격중인지
+
     private Animator anim = null;
 
     //튜토리얼에서 Orbital 작동 했는지
@@ -36,7 +38,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void Start()
     {
-        anim = GetComponent<Animator>();
+        anim = GetComponentInChildren<Animator>();
     }
 
     // Update is called once per frame
@@ -84,6 +86,7 @@ public class PlayerAttack : MonoBehaviour
         }
         if (!onOrbital)
         {
+            anim.SetTrigger("Orbital");
             //애니메이션 플레이
             StartCoroutine(OnOrbital());
             if (target == null)
@@ -111,8 +114,10 @@ public class PlayerAttack : MonoBehaviour
     IEnumerator OnOrbital()
     {
         onOrbital = true;
+        isAttack = true;
         yield return new WaitForSeconds(0.2f);
         onOrbital = false;
+        isAttack = false;
     }
     
     public void DragonBlaze()
@@ -125,6 +130,7 @@ public class PlayerAttack : MonoBehaviour
         //애니메이션 플레이
         if (!onBlaze)
         {
+            anim.SetBool("Blaze", true);
             StartCoroutine(OnBlaze());
             if (target == null)
             {
@@ -141,8 +147,9 @@ public class PlayerAttack : MonoBehaviour
                 this.transform.LookAt(target.transform);
                 DragonBlaze blaze = DragonBlazePool.instance.PopBlaze();
                 blaze.gameObject.transform.position = new Vector3(Random.Range(firePos.transform.position.x - 1, firePos.transform.position.x + 1),
-                                                                  Random.Range(firePos.transform.position.y - 1, firePos.transform.position.y - 1),
-                                                                  firePos.transform.position.z - 1);
+                                                                  firePos.transform.position.y,
+                                                                  Random.Range(firePos.transform.position.z - 1, firePos.transform.position.z + 1));
+                //new Vector3(Random.Range(firePos.transform.position.x - 1, firePos.transform.position.x + 1), Random.Range(firePos.transform.position.y - 1, firePos.transform.position.y - 1), firePos.transform.position.z - 1);
                 blaze.startPos = this.transform.position;
                 blaze.dir = this.transform.forward;
                 blaze.speed = blazeSpeed;
@@ -157,7 +164,14 @@ public class PlayerAttack : MonoBehaviour
         onBlaze = false;
     }
 
-    public void Cataclysm()
+    IEnumerator CataProc()
+    {
+        yield return new WaitForSeconds(1.2f);
+        DoCataclysm();
+        isAttack = false;
+    }
+
+    public void DoCataclysm()
     {
         if (!cataclysm)
         {
@@ -185,6 +199,14 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    public void Cataclysm()
+    {
+        Debug.Log("카타클리즘");
+        isAttack = true;
+        anim.SetTrigger("Cataclysm");
+        StartCoroutine(CataProc());
+    }
+    
     public void Skill3()
     {
         Debug.Log("Skill3");
